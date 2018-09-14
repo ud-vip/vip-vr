@@ -7,7 +7,7 @@ Unity is/was bundled with Monodevelop, but self-identified coders will likely wa
 
 After you've done that, you need to be able to easily share your work and progress. We'll be doing that using two tools: [Open Broadcaster Software](https://obsproject.com/) and [Git](https://git-scm.com/). OBS is a tool that people use to stream and record their screens, typically for streaming, but we'll be using it as a recording tool. Record your finished project in action, play around with it on screen for a couple of seconds, and save the video.
 
-Once you've done that, the next step is to add it to the git repo. We'll be using this one: https://github.com/AlinaWithAFace/vip-vr-assignment-01. Name your video file Lastname-Firstname-assignment-01. Make a pull request using the tool of your choice, such at the command line, but a plugin integrated with your IDE or something separate altogether like [Sourcetree](https://www.sourcetreeapp.com/) is fine too, as long as you know how to use it.
+Once you've done that, the next step is to add it to the git repo. We'll be using this one: https://github.com/AlinaWithAFace/vip-vr-assignment-00. Name your video file Lastname-Firstname-assignment-00. Make a pull request using the tool of your choice, such at the command line, but a plugin integrated with your IDE or something separate altogether like [Sourcetree](https://www.sourcetreeapp.com/) is fine too, as long as you know how to use it.
 
 If you're completely new to git (cough Alex), please reply to this email with some times you're available for a brief walk through on either Wednesday or Friday this week. There are a lot of tutorials that will walk you through using git in a command line, which is fantastic if you have experience with it.
 
