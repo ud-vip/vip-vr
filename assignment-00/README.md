@@ -13,7 +13,7 @@ If you're completely new to git (cough Alex), please reply to this email with so
 
 After that, reflect.
 
-Think about the project, take a look at the [design document](https://docs.google.com/document/d/1BTefrIn6bn2yzXI-gH4zSJV0cSGf5rTrSG3bzxgXpxg/edit?usp=sharing) and the [task board](https://trello.com/b/MgesfKag). Games are made up of a lot of interlocking pieces, and if there's a specific tiny piece that you know you want to own, start looking into how that part might work. You don't have to commit to anything now, but ideally everyone has a part to call their own two weeks from now.
+Think about the project, take a look at the [design document](https://github.com/AlinaWithAFace/vip-vr/blob/master/DESIGN-DOC.md) and the [task board](https://trello.com/b/MgesfKag). Games are made up of a lot of interlocking pieces, and if there's a specific tiny piece that you know you want to own, start looking into how that part might work. You don't have to commit to anything now, but ideally everyone has a part to call their own two weeks from now.
 
 Extra Credit:
 
