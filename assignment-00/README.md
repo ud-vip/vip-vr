@@ -20,3 +20,11 @@ Extra Credit:
 * If you self identify as a music man, throw together a 15 to 30 second music clip that you feel reflects the project's aesthetic.
 * If you self identify as an artist, design an enemy or collectible (in Tiltbrush, on paper, whichever displays it best).
 * If you self identify as a coder, make a script that uses unity's UI system in order to programmatically move a box.
+
+---
+
+It's been brought to my attention the fact that large binary files in git repos can get ugly really quickly, so, sorry to do this to you, but we're going to try something slightly different.
+
+Rather than pushing your videos to the git repo, I'd like you to add them to a google team drive. You should all be added to it, please put your videos in the Project Vaporwave/assignment-00 folder. If you can't by the meeting today, don't worry too much about it as it is quite last minute.
+
+But, that being said, you still need to know how to git! I'll come up with a better exercise sometime today and send it out after the meeting, so look out for that soon™.
