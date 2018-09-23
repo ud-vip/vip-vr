@@ -45,7 +45,7 @@ public class SurfaceFlow : MonoBehaviour
             position += curl * Time.deltaTime * flowStrength;
             position.y = sample.value + system.main.startSize.constant;
             particles[i].position = position;
-            if (position.x < 0.5f || position.x > 0.5f || position.z < -0.5f || position.z > 0.5f)
+            if (position.x < -0.5f || position.x > 0.5f || position.z < -0.5f || position.z > 0.5f)
             {
                 particles[i].remainingLifetime = 0f;
             }

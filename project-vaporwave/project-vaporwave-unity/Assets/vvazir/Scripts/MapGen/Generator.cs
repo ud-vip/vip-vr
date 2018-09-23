@@ -45,6 +45,7 @@ public class Generator : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        Application.targetFrameRate = 120;
         go = this.gameObject;
         asteroids = Resources.LoadAll("Asteroids/Prefabs/Asteroids", typeof(GameObject));
         CreateAsteroids();
@@ -83,6 +84,7 @@ public class Generator : MonoBehaviour
         */
         foreach (Transform child in go.transform)
         {
+            child.parent = null;
             GameObject.Destroy(child.gameObject);
             count--;
         }
