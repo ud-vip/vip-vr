@@ -67,7 +67,7 @@ public class TextureCreator : MonoBehaviour
             for (int x = 0; x < resolution; x++)
             {
                 Vector3 point = Vector3.Lerp(point0, point1, (x + 0.5f) * stepSize);
-                float sample = Noise.Sum(method,point, frequency,octaves,lacunarity,persistence);
+                float sample = Noise.Sum(method,point, frequency,octaves,lacunarity,persistence).value;
                 if (type != NoiseMethodType.Value)
                 {
                     sample = sample * 0.5f + 0.5f;
