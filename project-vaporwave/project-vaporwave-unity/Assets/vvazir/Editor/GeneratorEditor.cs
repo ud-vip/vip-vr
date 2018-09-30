@@ -14,6 +14,7 @@ public class GeneratorInspector : Editor
         if (Application.isPlaying)
         {
             creator.CreateAsteroids();
+            creator.MergeAsteroids();
         }
     }
     private void OnEnable()

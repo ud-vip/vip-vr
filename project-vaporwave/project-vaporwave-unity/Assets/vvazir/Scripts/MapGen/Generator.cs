@@ -42,6 +42,8 @@ public class Generator : MonoBehaviour
     private int count = 0;
     private GameObject go;
     private Texture2D texture;
+    private bool merged = false;
+
     // Use this for initialization
     void Start()
     {
@@ -49,6 +51,8 @@ public class Generator : MonoBehaviour
         go = this.gameObject;
         asteroids = Resources.LoadAll("Asteroids/Prefabs/Asteroids", typeof(GameObject));
         CreateAsteroids();
+        MergeAsteroids();
+
     }
     private void OnEnable()
     {
@@ -66,22 +70,38 @@ public class Generator : MonoBehaviour
         }
         */
     }
+    public void MergeAsteroids()
+    {
+        foreach (Transform checkingChild in go.transform)
+        {
+            if (checkingChild.gameObject != null && checkingChild.parent!=null)
+            {
+                MeshCollider mc = checkingChild.GetComponent<MeshCollider>();
+                foreach (Transform checkChild in go.transform)
+                {
+                    if (checkChild.gameObject != null && checkChild.parent!=null && checkingChild.name != checkChild.name)
+                    {
+                        MeshCollider tmpMC = checkChild.GetComponent<MeshCollider>();
+                        if (mc.bounds.Intersects(tmpMC.bounds))
+                        {
+                            
+                            Debug.Log(System.String.Format("Merging {0} with {1}",checkingChild.name,checkChild.name));
+                            //Debug.Log(checkingChild.transform.localScale.magnitude);
+                            checkingChild.transform.localScale += Vector3.one * (tmpMC.transform.localScale.x * 2);
+                            //Debug.Log(checkingChild.transform.localScale.magnitude);
+                            checkChild.parent = null;
+                            GameObject.Destroy(checkChild.gameObject);
+                            Debug.Log(checkChild.gameObject == null);
+                            count--;
+                        }
+                    }
+                }
+            }
+        }
+        Debug.Log(go.transform.childCount);
+    }
     public void CreateAsteroids()
     {
-        /*
-        if (texture.width != resolution)
-        {
-            texture.Resize(resolution, resolution);
-        }
-        
-        var ColorArray = texture.GetPixels();
-        for (int i = 0; i < ColorArray.Length; i++)
-        {
-            ColorArray[i] = Color.black;
-        }
-        texture.SetPixels(ColorArray);
-        texture.Apply();
-        */
         foreach (Transform child in go.transform)
         {
             child.parent = null;
@@ -93,7 +113,6 @@ public class Generator : MonoBehaviour
         NoiseMethod method = Noise.noiseMethods[(int)type][dimensions - 1];
         int scale = Mathf.FloorToInt(chunkSize * resolution);
        
-        //float[,,] map = new float [resolution, resolution, resolution];
         if (chunkSize != 0f)
         {
             Vector3 point00 = transform.TransformPoint(new Vector3(-0.5f, -0.5f));
@@ -130,6 +149,10 @@ public class Generator : MonoBehaviour
                                                 (y - .5f) * 1f,
                                                 (z - .5f) * 1f),
                                     Quaternion.identity);                                           // Same rotation
+                                MeshCollider mc = tmp.AddComponent(typeof(MeshCollider)) as MeshCollider;
+                                
+                                tmp.AddComponent<vars>();
+                                mc.convex = true;
                                 tmp.transform.parent = go.transform;                                // Set as child of main
                                 tmp.transform.localScale *= (sum) * (1f / ((scale * scale * scale)));                        // Scale based on position
 
@@ -166,13 +189,13 @@ public class Generator : MonoBehaviour
                 }
             }
         }
-        Debug.Log(go.transform.childCount);
+        
         //texture.Apply();
 
     }
 
     // Update is called once per frame
     //void Update () {
-
+            
     //}
 }
