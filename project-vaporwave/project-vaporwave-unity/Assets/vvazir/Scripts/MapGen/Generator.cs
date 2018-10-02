@@ -42,8 +42,7 @@ public class Generator : MonoBehaviour
     private int count = 0;
     private GameObject go;
     private Texture2D texture;
-    private bool merged = false;
-
+ 
     // Use this for initialization
     void Start()
     {
@@ -52,7 +51,7 @@ public class Generator : MonoBehaviour
         asteroids = Resources.LoadAll("Asteroids/Prefabs/Asteroids", typeof(GameObject));
         CreateAsteroids();
         MergeAsteroids();
-
+        Debug.Log(go.transform.childCount);
     }
     private void OnEnable()
     {
@@ -85,20 +84,20 @@ public class Generator : MonoBehaviour
                         if (mc.bounds.Intersects(tmpMC.bounds))
                         {
                             
-                            Debug.Log(System.String.Format("Merging {0} with {1}",checkingChild.name,checkChild.name));
+                            //Debug.Log(System.String.Format("Merging {0} with {1}",checkingChild.name,checkChild.name));
                             //Debug.Log(checkingChild.transform.localScale.magnitude);
                             checkingChild.transform.localScale += Vector3.one * (tmpMC.transform.localScale.x * 2);
                             //Debug.Log(checkingChild.transform.localScale.magnitude);
                             checkChild.parent = null;
                             GameObject.Destroy(checkChild.gameObject);
-                            Debug.Log(checkChild.gameObject == null);
+                            //Debug.Log(checkChild.gameObject == null);
                             count--;
                         }
                     }
                 }
             }
         }
-        Debug.Log(go.transform.childCount);
+        
     }
     public void CreateAsteroids()
     {
@@ -112,7 +111,7 @@ public class Generator : MonoBehaviour
         float stepSize = 1f / resolution;
         NoiseMethod method = Noise.noiseMethods[(int)type][dimensions - 1];
         int scale = Mathf.FloorToInt(chunkSize * resolution);
-       
+        long scale3 = (long)Mathf.Pow(scale, 3f);        
         if (chunkSize != 0f)
         {
             Vector3 point00 = transform.TransformPoint(new Vector3(-0.5f, -0.5f));
@@ -122,7 +121,14 @@ public class Generator : MonoBehaviour
             Vector3 zpoint0 = transform.TransformPoint(new Vector3(0, 0, -0.5f));
             Vector3 zpoint1 = transform.TransformPoint(new Vector3(0, 0, 0.5f));
             float sum = 0f;
+            //long pos = (long)Mathf.Pow(resolution, 3f);
+            //for (long currPos = 0; currPos < pos; currPos += scale3)
+            //{
 
+            //    long z = currPos % resolution;
+            //    long x = currPos % (long)Mathf.Pow(z, 2f);
+            //    long y = currPos % (long)Mathf.Pow(x, 3f);
+            //}
             for (int y = 0; y < resolution; y += 1)
             {
                 int yi = y % scale;
@@ -136,31 +142,6 @@ public class Generator : MonoBehaviour
                     {
                         int zi = z % scale;
                         Vector3 zpoint = Vector3.Lerp(zpoint0, zpoint1, (z + 0.5f) * stepSize);
-
-                        if ((sum > (threshold * (scale * scale * scale))*largeAsteroidSize) || (yi == scale/2 && xi == scale/2 && zi == scale/2))
-                        {   
-                            if (sum > threshold * (scale * scale * scale) && count < asteroidLimit)
-                            {
-                                //Debug.Log(sum);
-                                count++;
-                                GameObject tmp = (GameObject)Instantiate(
-                                    asteroids[(Random.Range(0, asteroids.Length))],                            // Random Asteroid
-                                    new Vector3((x - .5f) * 1f,                          // Random Location
-                                                (y - .5f) * 1f,
-                                                (z - .5f) * 1f),
-                                    Quaternion.identity);                                           // Same rotation
-                                MeshCollider mc = tmp.AddComponent(typeof(MeshCollider)) as MeshCollider;
-                                
-                                tmp.AddComponent<vars>();
-                                mc.convex = true;
-                                tmp.transform.parent = go.transform;                                // Set as child of main
-                                tmp.transform.localScale *= (sum) * (1f / ((scale * scale * scale)));                        // Scale based on position
-
-
-                            }
-                            sum = 0f;
-                        }
-
                         point += zpoint;
 
                         point.z = (z + 0.5f) * stepSize;
@@ -171,7 +152,45 @@ public class Generator : MonoBehaviour
                         }
                         sum += sample;
 
+                        if ((sum > (threshold * (scale * scale * scale)) * largeAsteroidSize) || (yi == scale / 2 && xi == scale / 2 && zi == scale / 2))
+                        {
+                            if (sum > threshold * (scale * scale * scale) && count < asteroidLimit)
+                            {
+                                //Debug.Log(sum);
+                                count++;
+                                GameObject tmp = (GameObject)Instantiate(
+                                    asteroids[(Random.Range(0, asteroids.Length))],                            // Random Asteroid
+                                    new Vector3((x - .5f) * 1f,                          // Random Location
+                                                (y - .5f) * 1f,
+                                                (z - .5f) * 1f),
+                                    Quaternion.identity);                                           // Same rotation
 
+                                tmp.tag = "Asteroid";
+                                tmp.AddComponent<vars>();
+                                tmp.name = tmp.name.Replace("(Clone)", (System.String.Format("({0})", count))).Trim();
+                                vars v = tmp.GetComponent<vars>();
+                                
+                                v.go = tmp;
+                                v.maxHP =(int)((sum) * (1f / ((scale * scale * scale))) * 1000);
+                                v.currHP = tmp.GetComponent<vars>().maxHP;
+                                v.mc = tmp.AddComponent<MeshCollider>();
+                                v.mc.convex = true;
+                                tmp.transform.parent = go.transform;                                // Set as child of main
+                                tmp.transform.localScale *= (sum) * (1f / ((scale * scale * scale)));                        // Scale based on position
+                                tmp.AddComponent<Rigidbody>();
+                                v.rb = tmp.GetComponent<Rigidbody>();
+                                v.rb.isKinematic = false;
+                                v.rb.angularVelocity = Random.insideUnitSphere * Random.Range(.01f, 1f);
+                                v.rb.drag = 0;
+                                v.rb.angularDrag = 0;
+                                v.rb.useGravity = false;
+                                v.rb.mass = v.maxHP;
+                                
+
+
+                            }
+                            sum = 0f;
+                        }
 
                         if (count >= asteroidLimit)
                         {
