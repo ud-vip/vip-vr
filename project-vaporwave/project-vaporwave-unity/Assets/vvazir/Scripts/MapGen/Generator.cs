@@ -38,17 +38,35 @@ public class Generator : MonoBehaviour
 
     private int currentResolution;
 
-    private Object[] asteroids;
+    private GameObject[] asteroids;
     private int count = 0;
     private GameObject go;
     private Texture2D texture;
- 
+    private GameObject exploded;
+    private GameObject skybox;
+    public GameObject getAsteroid(int i)
+    {
+        if (i >= asteroids.Length || i <0)
+        {
+            return asteroids[1];
+        }
+        else
+        {
+            return asteroids[i];
+        }
+    }
     // Use this for initialization
     void Start()
     {
         Application.targetFrameRate = 120;
         go = this.gameObject;
-        asteroids = Resources.LoadAll("Asteroids/Prefabs/Asteroids", typeof(GameObject));
+        float scale = resolution + Mathf.Log10(resolution) * 50;
+        skybox = transform.Find("skybox").gameObject;
+        skybox.transform.position = transform.position + new Vector3(scale/8,scale/8,scale/8);
+        skybox.transform.localScale = Vector3.one * (scale);
+        Debug.Log(skybox.transform.localScale);
+        asteroids = Resources.LoadAll<GameObject>("Asteroids/Prefabs/Asteroids");
+        exploded = Resources.Load<GameObject>("Asteroids/Prefabs/Asteroids-fractured-fill");
         CreateAsteroids();
         MergeAsteroids();
         Debug.Log(go.transform.childCount);
@@ -73,11 +91,15 @@ public class Generator : MonoBehaviour
     {
         foreach (Transform checkingChild in go.transform)
         {
+            if (checkingChild.tag != "Asteroid")
+                continue;
             if (checkingChild.gameObject != null && checkingChild.parent!=null)
             {
                 MeshCollider mc = checkingChild.GetComponent<MeshCollider>();
                 foreach (Transform checkChild in go.transform)
                 {
+                    if (checkChild.tag != "Asteroid")
+                        continue;
                     if (checkChild.gameObject != null && checkChild.parent!=null && checkingChild.name != checkChild.name)
                     {
                         MeshCollider tmpMC = checkChild.GetComponent<MeshCollider>();
@@ -87,6 +109,9 @@ public class Generator : MonoBehaviour
                             //Debug.Log(System.String.Format("Merging {0} with {1}",checkingChild.name,checkChild.name));
                             //Debug.Log(checkingChild.transform.localScale.magnitude);
                             checkingChild.transform.localScale += Vector3.one * (tmpMC.transform.localScale.x * 2);
+                            checkingChild.gameObject.GetComponent<vars>().maxHP += checkChild.gameObject.GetComponent<vars>().maxHP;
+                            checkingChild.gameObject.GetComponent<vars>().currHP += checkChild.gameObject.GetComponent<vars>().currHP;
+
                             //Debug.Log(checkingChild.transform.localScale.magnitude);
                             checkChild.parent = null;
                             GameObject.Destroy(checkChild.gameObject);
@@ -103,9 +128,12 @@ public class Generator : MonoBehaviour
     {
         foreach (Transform child in go.transform)
         {
-            child.parent = null;
-            GameObject.Destroy(child.gameObject);
-            count--;
+            if (child.tag == "Asteroid")
+            {
+                child.parent = null;
+                GameObject.Destroy(child.gameObject);
+                count--;
+            }
         }
         count = 0;
         float stepSize = 1f / resolution;
@@ -158,27 +186,34 @@ public class Generator : MonoBehaviour
                             {
                                 //Debug.Log(sum);
                                 count++;
-                                GameObject tmp = (GameObject)Instantiate(
-                                    asteroids[(Random.Range(0, asteroids.Length))],                            // Random Asteroid
-                                    new Vector3((x - .5f) * 1f,                          // Random Location
-                                                (y - .5f) * 1f,
-                                                (z - .5f) * 1f),
-                                    Quaternion.identity);                                           // Same rotation
+                                int idx = (Random.Range(0, asteroids.Length));
+                                GameObject tmp = Instantiate(
+                                    asteroids[idx],                            // Random Asteroid
+                                    new Vector3((x) * 1f,                          // Random Location
+                                                (y) * 1f,
+                                                (z) * 1f),
+                                    Quaternion.identity,transform);                                           // Same rotation
 
                                 tmp.tag = "Asteroid";
                                 tmp.AddComponent<vars>();
                                 tmp.name = tmp.name.Replace("(Clone)", (System.String.Format("({0})", count))).Trim();
                                 vars v = tmp.GetComponent<vars>();
-                                
+                                // Info
+                                v.idx = idx;
                                 v.go = tmp;
-                                v.maxHP =(int)((sum) * (1f / ((scale * scale * scale))) * 1000);
-                                v.currHP = tmp.GetComponent<vars>().maxHP;
-                                v.mc = tmp.AddComponent<MeshCollider>();
-                                v.mc.convex = true;
+                                v.main = transform.gameObject;
+                                v.exploded = exploded;
+                                // Transform
                                 tmp.transform.parent = go.transform;                                // Set as child of main
                                 tmp.transform.localScale *= (sum) * (1f / ((scale * scale * scale)));                        // Scale based on position
-                                tmp.AddComponent<Rigidbody>();
-                                v.rb = tmp.GetComponent<Rigidbody>();
+                                // HP
+                                v.maxHP =(int)((sum) * (1f / ((scale * scale * scale))) * 1000);
+                                v.currHP = tmp.GetComponent<vars>().maxHP;
+                                // Mesh collider
+                                v.mc = tmp.AddComponent<MeshCollider>();
+                                v.mc.convex = true;
+                                // Rigidbody
+                                v.rb = tmp.AddComponent<Rigidbody>();
                                 v.rb.isKinematic = false;
                                 v.rb.angularVelocity = Random.insideUnitSphere * Random.Range(.01f, 1f);
                                 v.rb.drag = 0;
