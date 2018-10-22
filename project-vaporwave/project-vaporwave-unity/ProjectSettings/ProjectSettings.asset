@@ -716,7 +716,7 @@ PlayerSettings:
   facebookSdkVersion: 7.9.4
   apiCompatibilityLevel: 2
   cloudProjectId: cec78256-2a3b-4bc3-9588-0dec72d103af
-  projectName: 
+  projectName: project-vaporwave
   organizationId: alinawithaface
   cloudEnabled: 0
   enableNativePlatformBackendsForNewInputSystem: 0
