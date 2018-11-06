@@ -67,8 +67,13 @@ public class PlaneController : MonoBehaviour {
         X = JosytickAnimator.GetFloat("Blend X")*20;
         Y = JosytickAnimator.GetFloat("Blend Z")*20;
         Quaternion rotation = Quaternion.Euler(Y,0,-X);
+        Quaternion rot = Quaternion.Euler(Y, 0, -X);
         transform.localRotation = Quaternion.Slerp(transform.localRotation, rotation, Time.deltaTime*2);
         // PLANE MOVEMENT FORWARD
-        transform.position = transform.position + new Vector3(transform.forward.x, transform.forward.y, transform.forward.z) / 30 * planeForwardSpeed;
+        Vector3 direction = (transform.forward/5)*planeForwardSpeed;
+        //tmp.SetLookRotation(direction,transform.localRotation.eulerAngles);
+        //direction = tmp * direction;
+        transform.position = transform.position + direction;
+        //transform.Translate(new Vector3(JoystickAnimator.GetFloat ))
     }
 }
