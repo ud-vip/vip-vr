@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class vars : MonoBehaviour {
+public class vars : MonoBehaviour
+{
 
-    
+
     public int currHP;
     public int maxHP;
     public GameObject exploded;
@@ -15,88 +16,85 @@ public class vars : MonoBehaviour {
     public GameObject main;
     public float radius = 20;
     public int idx;
-    // Use this for initialization
-    void Start () {
-       
-    }
     
-    // Update is called once per frame
-    void Update () {
-		
-	}
-    void OnCollisionEnter(Collision collision)
+    // Got hit by another object
+    // Format of tmp is [tag,dmg]
+    // tag is a string, dmg is a float
+    void takeDMG(object[] tmp)
     {
-        GameObject contact = collision.gameObject;
-        
-
-        Debug.Log(System.String.Format("Collision between {0} with {1}",go.name,contact.name));
-        if (contact.tag == "Asteroid") {
-            vars v = contact.GetComponent<vars>();
-            int dmg = Mathf.Max((int)collision.impulse.magnitude/4,1);
-            //Dmg to other asteroid
-            if (dmg >= v.maxHP)
-            {
-
-                Debug.Log(System.String.Format("{0} is ded", contact.transform.name));
-                v.internalExploded = Instantiate(v.exploded, contact.transform.position,contact.transform.rotation,main.transform);
-                v.internalExploded.transform.localScale = contact.transform.localScale;
-                foreach (Transform t in v.internalExploded.transform)
-                {
-                    t.gameObject.GetComponent<shards>().force = dmg / 4;
-                    t.gameObject.GetComponent<shards>().currHP = (int)contact.gameObject.transform.GetComponent<Rigidbody>().mass / 12;
-                    t.gameObject.GetComponent<shards>().maxHP = (int)contact.gameObject.transform.GetComponent<Rigidbody>().mass / 12;
-                    t.gameObject.GetComponent<shards>().direction = transform.GetComponent<Rigidbody>().velocity;
-                    t.gameObject.GetComponent<shards>().start = collision.contacts[0].point;
-                    
-                    t.gameObject.GetComponent<Rigidbody>().mass = contact.gameObject.transform.GetComponent<Rigidbody>().mass / 25;
-                }
-                contact.SetActive(false);
-                //Explode(dmg/100f);
-                Destroy(contact);
-                
-            }
-            else if (dmg >= v.currHP)
-            {
-                Debug.Log("live, my children");
-                int count = (int)Random.Range(1, 5);
-
-                float size = contact.GetComponent<Renderer>().bounds.size.magnitude/count;
-                
-                Destroy(contact);
-            }
-            else
-            {
-                Debug.Log("I lived, bitch");
-                v.currHP -= dmg;
-            }
-        }
-        else if(contact.tag=="Asteroid-shard")
+        string tag = (string)tmp[0];
+        int dmg = (int)(float)tmp[1];
+        // Modify dmg stat
+        if (tag == "Asteroid")
         {
-            shards v = contact.GetComponent<shards>();
-            int dmg = Mathf.Max((int)collision.impulse.magnitude / 4, 1);
-            if (dmg >= v.currHP)
-            {
-
-                Debug.Log(System.String.Format("{0} is ded", contact.transform.name));
-                //internalExploded = Instantiate(exploded, contact.transform.position, contact.transform.rotation, main.transform);
-                //internalExploded.transform.localScale = contact.transform.localScale;
-                Destroy(contact);
-            }
-           
-            else
-            {
-                Debug.Log("I lived, bitch");
-                v.currHP -= dmg;
-            }
+            dmg = dmg;
         }
-        else if (contact.tag == "skybox")
+        else if (tag == "Asteroid-shard")
         {
-            Debug.Log("Goodbye cruel world");
+            dmg = dmg;
+        }
+        else if (tag == "skybox")
+        {
+            dmg = maxHP;
         }
         else
         {
+            // No idea how you would get here, but die anyway to save the others
             Debug.Log("How!?!?!?!?!?");
+            Destroy(gameObject);
         }
-       
+        // Took to much dmg, explode
+        if (dmg >= maxHP)
+        {
+
+            Debug.Log(System.String.Format("{0} is ded", transform.name));
+            internalExploded = Instantiate(exploded, transform.position, transform.rotation, main.transform);
+            internalExploded.transform.localScale = transform.localScale;
+            foreach (Transform t in internalExploded.transform)
+            {
+                t.gameObject.GetComponent<shards>().force = dmg / 16;
+                t.gameObject.GetComponent<shards>().currHP = (int)gameObject.transform.GetComponent<Rigidbody>().mass / 12;
+                t.gameObject.GetComponent<shards>().maxHP = (int)gameObject.transform.GetComponent<Rigidbody>().mass / 12;
+                t.gameObject.GetComponent<shards>().direction = transform.GetComponent<Rigidbody>().velocity;
+                t.gameObject.GetComponent<Rigidbody>().mass = gameObject.transform.GetComponent<Rigidbody>().mass / 25;
+                t.SendMessage("explode",transform.position);
+            }
+            //Explode(dmg/100f);
+            Destroy(gameObject);
+
+        }
+        else if (dmg >= currHP)
+        {
+            Debug.Log("live, my children");
+            int count = (int)Random.Range(1, 5);
+
+            float size = GetComponent<Renderer>().bounds.size.magnitude / count;
+
+            Destroy(gameObject);
+        }
+        else
+        {
+            Debug.Log("I lived, bitch");
+            currHP -= dmg;
+        }
+    }
+
+
+    public static float KineticEnergy(Rigidbody rb)
+    {
+        // mass in kg, velocity in meters per second, result is joules
+        return 0.5f * rb.mass * Mathf.Pow(rb.velocity.magnitude, 2);
+    }
+    void OnCollisionEnter(Collision collision)
+    {
+        GameObject contact = collision.gameObject;
+        object[] tmp = new object[2];
+        // For an asteroid, dmg done is based on its kinetic energy.
+        // For weapons, this can be replaced with a weapons dmg
+        // tmp will always be the tag of the object that caused the dmg and how much dmg
+        tmp[0] = gameObject.tag;
+        tmp[1] = KineticEnergy(rb);
+        Debug.Log(System.String.Format("Collision between {0} with {1}", go.name, contact.name));
+        contact.SendMessage("takeDMG", tmp, SendMessageOptions.DontRequireReceiver);
     }
 }
