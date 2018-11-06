@@ -44,6 +44,7 @@ public class Generator : MonoBehaviour
     private Texture2D texture;
     private GameObject exploded;
     private GameObject skybox;
+    
     public GameObject getAsteroid(int i)
     {
         if (i >= asteroids.Length || i <0)
